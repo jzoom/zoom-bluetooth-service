@@ -343,12 +343,7 @@ class BluetoothService{
   }
 
   getDeviceById(deviceId){
-    for(var i in this.devcies){
-      var device = this.devices[i];
-      if(device.deviceId == deviceId){
-        return device;
-      }
-    }
+    return this.devices[deviceId];
   }
 
   async startupDevice(deviceId){
@@ -378,6 +373,7 @@ class BluetoothService{
       }
     }
     try{
+      await bluetoothAdapter.stopBluetoothDevicesDiscovery();
       await bluetoothAdapter.closeBluetoothAdapter();
     }catch(e){
       console.warn("关闭蓝牙发生异常",e);

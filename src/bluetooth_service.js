@@ -97,6 +97,7 @@ class BluetoothDevice{
   setConfig(config){
     this.config = config;
   }
+
 }
 
 class BleDevice extends BluetoothDevice{
@@ -387,7 +388,6 @@ class BluetoothService{
   }
 
   onRawDeviceFound(devices){
-   
     for(var i in devices.devices){
       var rawDevice = devices.devices[i];
       if(this.debug){

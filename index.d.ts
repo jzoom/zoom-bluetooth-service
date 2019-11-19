@@ -93,6 +93,11 @@ declare interface BluetoothDevice extends RawDevice{
 
   //device的write方法，当完成写入一个命令的时候，需要等待返回或者抛出错误s
   write(command:ArrayBuffer|Uint8Array|string):Promise<ArrayBuffer|Uint8Array|string>;
+
+  /**
+   * 设备配置
+   */
+  config:DeviceConfig;
 }
 
 /**
@@ -270,8 +275,10 @@ declare class BleService{
 
 }
 
-
-declare class DeviceError{
+/**
+ * 设备异常，如设备命令错误、设备命令超时
+ */
+declare class DeviceError extends Error{
 
 }
 export {DeviceError};

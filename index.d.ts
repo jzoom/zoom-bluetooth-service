@@ -281,5 +281,6 @@ declare class BleService{
 declare class DeviceError extends Error{
 
 }
-export {DeviceError};
+
+export {DeviceError,DeviceConfig,BleDevice,RawDevice,ClassicBluetoothDevice};
 export default BleService;

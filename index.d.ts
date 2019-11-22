@@ -224,13 +224,14 @@ declare interface DeviceConfig{
 
 
 
-declare class BleService{
+declare class BluetoothService{
 
   /**
    * 构造函数需要提供设备配置
-   * @param configs 
+   * @param configs 提供一组设备配置
+   * @param debug 是否调试输出
    */
-  constructor(configs:Array<DeviceConfig>);
+  constructor(configs:Array<DeviceConfig>,debug:boolean=false);
 
   /**
    * 开始扫描设备
@@ -293,4 +294,4 @@ declare class DeviceError extends Error{
 }
 
 export {DeviceError,DeviceConfig,BleDevice,RawDevice,ClassicBluetoothDevice};
-export default BleService;
+export default BluetoothService;

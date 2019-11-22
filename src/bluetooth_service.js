@@ -126,11 +126,17 @@ class BleDevice extends BluetoothDevice{
     await this.createConnection();
     //发现服务
     var services = await this.getServices();
-    console.log(services);
+    if(this.debug){
+      console.log(services);
+    }
+   
     for(var i in services){
       var service = services[i];
       var characterisrics = await this.getCharacteristics(service.uuid);
-      console.log(characterisrics);
+      if(this.debug){
+        console.log(characterisrics);
+      }
+     
     }
     
     await this.setNotify({
@@ -248,7 +254,10 @@ class BleDevice extends BluetoothDevice{
           this,
           pack);
       }else{
-        console.log('在promise调用过后再次调用??');
+        if(this.debug){
+          console.warn('在promise调用过后再次调用??');
+        }
+        
       }
     
     }
@@ -262,7 +271,9 @@ class BleDevice extends BluetoothDevice{
       this.reject = undefined;
       reject(e);
     } else {
-      console.log('在promise调用过后再次调用??');
+      if(this.debug){
+        console.warn('在promise调用过后再次调用??');
+      }
     }
   }
 
@@ -270,12 +281,18 @@ class BleDevice extends BluetoothDevice{
     if (!value) {
       throw new Error('请输入写入值');
     }
-    if (typeof value == 'string') {
-      console.log('写入值', value);
+    //debug才输出
+    if(this.debug){
+      if (typeof value == 'string') {
+        console.log('写入值', value);
+        value = str2hex(value);
+      } else {
+        console.log('写入值', hex2str(value));
+      }
+    }else{
       value = str2hex(value);
-    } else {
-      console.log('写入值', hex2str(value));
     }
+   
     return bluetoothAdapter.writeBLECharacteristicValue({
       deviceId: this.deviceId,
       serviceId: this.serviceId,

@@ -67,6 +67,7 @@ class YourDeviceConfig{
 ## 定义服务
 
 ```
+import ZoomBleService from 'zoom-bluetooth-service';
 var service = new ZoomBleService([new YourDeviceConfig()]);
 
 service.onDeviceFound(async (device)=>{

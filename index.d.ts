@@ -98,6 +98,16 @@ declare interface BluetoothDevice extends RawDevice{
    * 设备配置
    */
   config:DeviceConfig;
+  
+  /**
+   * 设置其他信息，可以使用info属性访问
+   * @param info 
+   */
+  setInfo(info:any):void;
+  /**
+   * 其他信息,由setInfo方法设置，此属性用于用户自定义信息
+   */
+  info:any;
 }
 
 /**

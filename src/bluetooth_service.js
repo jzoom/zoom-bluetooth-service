@@ -97,6 +97,10 @@ class BluetoothDevice{
   setConfig(config){
     this.config = config;
   }
+  
+  setInfo(info){
+    this.info = info;
+  }
 
 }
 

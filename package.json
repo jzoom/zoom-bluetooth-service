@@ -1,6 +1,6 @@
 {
   "name": "zoom-bluetooth-service",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "",
   "main": "lib/index.js",
   "typings": "index.d.ts",
@@ -24,5 +24,6 @@
     "zoom-hex": "^1.6.16"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {}
 }

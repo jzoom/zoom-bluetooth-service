@@ -1,4 +1,5 @@
 import BluetoothService from '../src/bluetooth_service';
+import { DeviceConfig } from '../src/bluetooth_service';
 
 describe('test bluetooth serice', () => {
 
@@ -20,15 +21,26 @@ describe('test bluetooth serice', () => {
 
 
     });
-    var service = new BluetoothService([
-      {
-        filter(device){
-          return device.name.startsWith("ABC");
-        },
-        onCreateDevice(service,device){
-          return service.createBleDevice(device);
-        }
+
+    class MyDeviceConfig extends DeviceConfig{
+      filter(device){
+        return device.name.startsWith("ABC");
       }
+
+      onCreateDevice(service,device){
+        return service.createBleDevice(device);
+      }
+    }
+
+    var config = new MyDeviceConfig();
+    expect(config.writeTimeout).toBe(200);
+    expect(config.connectTimeout).toBe(5000);
+    
+    
+    
+
+    var service = new BluetoothService([
+      config
     ]);
 
     service.onDeviceFound((device)=>{

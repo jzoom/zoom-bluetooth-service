@@ -7,6 +7,18 @@ var bluetoothAdapter;
 
 const MAX_DATE_LEN = 512;
 
+class DeviceConfig{
+  
+  writeTimeout = 200;
+  connectTimeout = 5000;
+
+  constructor(){
+
+  }
+
+
+}
+
 class DeviceBuffer{
 
   constructor(bufferSize){
@@ -68,6 +80,7 @@ class BluetoothDevice{
     this.deviceId = device.deviceId;
     this.name = device.name;
     this.buffer = new DeviceBuffer(MAX_DATE_LEN);
+    
   }
 
   setTag(value){
@@ -107,7 +120,7 @@ class BluetoothDevice{
 class BleDevice extends BluetoothDevice{
   constructor(device){
     super(device);
-    this.timeout = 6000;
+    this.connectTimeout = 6000;
   }
 
   async close(){
@@ -151,7 +164,7 @@ class BleDevice extends BluetoothDevice{
     try{
       var resp = await this.config.onValueChange(
         this,
-        value
+        value.value
       );
       if(resp){
         this._dispatchSuccess(resp);
@@ -223,7 +236,7 @@ class BleDevice extends BluetoothDevice{
           this.timeoutHandle = null;
           this._dispatchError(new DeviceError(DeviceError.IO_ERROR));
         }
-      }, this.timeout);
+      }, this.config.writeTimeout);
     }
     return new Promise((resolve, reject) => {
       this.resolve = resolve;
@@ -417,10 +430,14 @@ class BluetoothService{
       for(var j in this.configs){
         var config = this.configs[j];
         if(config.filter(rawDevice)){
+          if(!config.onCreateDevice){
+            throw new Error("设备配置缺少onCreateDevice方法，请阅读文档");
+          }
             var device = config.onCreateDevice(this,rawDevice);
             device.setConfig(config);
             this.devices[rawDevice.deviceId] = device;
             this._onDeviceFound && this._onDeviceFound(device);
+            break;
         }
       }
     }
@@ -433,5 +450,5 @@ BluetoothService.setAdapter=(adapter)=>{
   bluetoothAdapter = adapter;
 };
 
-
+export {DeviceConfig};
 export default BluetoothService;

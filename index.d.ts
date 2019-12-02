@@ -156,7 +156,7 @@ declare interface BleDevice extends BluetoothDevice{
 /**
  * 设备配置
  */
-declare interface DeviceConfig{
+declare class DeviceConfig{
 
   /**
    * 低功耗蓝牙配置
@@ -166,11 +166,23 @@ declare interface DeviceConfig{
   serviceId?:string;
   writeId?:string;
 
+
+  
+
   /**
    * 经典蓝牙配置
    */
   mac:string;
 
+  /**
+   * 扫描并连接设备的超时时间(毫秒，默认5000)
+   */
+  connectTimeout:number;
+
+  /**
+   * 写入超时时间(毫秒，默认200)
+   */
+  writeTimeout:number;
 
   /**
    * 将扫描结果进行验证，如果符合本设备配置的要求，则返回true，
@@ -182,19 +194,19 @@ declare interface DeviceConfig{
    * 创建实际设备
    * @param device 
    */
-  onCreateDevice(service:BleService,device:RawDevice):BluetoothDevice;
+  onCreateDevice(service:BluetoothService,device:RawDevice):BluetoothDevice;
 
   /**
    * 如何启动
    * @param device 
    */
-  onStartup(service:BleService,device:BluetoothDevice):Promise<any>;
+  onStartup(service:BluetoothService,device:BluetoothDevice):Promise<any>;
 
   /**
    * 如何关闭
    * @param device 
    */
-  onShutdown(service:BleService,device:BluetoothDevice):Promise<any>;
+  onShutdown(service:BluetoothService,device:BluetoothDevice):Promise<any>;
 
   /**
    * 当获取到一个包的时候
@@ -231,7 +243,7 @@ declare class BluetoothService{
    * @param configs 提供一组设备配置
    * @param debug 是否调试输出
    */
-  constructor(configs:Array<DeviceConfig>,debug:boolean=false);
+  constructor(configs:Array<DeviceConfig>,debug:boolean);
 
   /**
    * 开始扫描设备

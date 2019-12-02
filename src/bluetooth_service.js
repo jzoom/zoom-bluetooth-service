@@ -19,6 +19,11 @@ class DeviceConfig{
 
 }
 
+
+class BleDeviceConfig extends DeviceConfig{
+  
+}
+
 class DeviceBuffer{
 
   constructor(bufferSize){
@@ -120,7 +125,6 @@ class BluetoothDevice{
 class BleDevice extends BluetoothDevice{
   constructor(device){
     super(device);
-    this.connectTimeout = 6000;
   }
 
   async close(){
@@ -132,6 +136,8 @@ class BleDevice extends BluetoothDevice{
     this.serviceId = config.serviceId;
     this.notifyId = config.notifyId;
     this.writeId = config.writeId;
+    this.connectTimeout = config.connectTimeout || 10000;
+    this.writeTimeout = config.writeTimeout || 200;
   }
 
   async startup(){
@@ -433,7 +439,7 @@ class BluetoothService{
           if(!config.onCreateDevice){
             throw new Error("设备配置缺少onCreateDevice方法，请阅读文档");
           }
-            var device = config.onCreateDevice(this,rawDevice);
+            var device = config.onCreateDevice(this,rawDevice,config);
             device.setConfig(config);
             this.devices[rawDevice.deviceId] = device;
             this._onDeviceFound && this._onDeviceFound(device);

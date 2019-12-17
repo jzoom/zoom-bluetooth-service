@@ -9,11 +9,11 @@ const MAX_DATE_LEN = 512;
 
 class DeviceConfig{
   
-  writeTimeout = 200;
-  connectTimeout = 5000;
-
+ 
   constructor(){
-
+    this.writeTimeout = 200;
+    this.connectTimeout = 5000;
+  
   }
 
 
@@ -138,6 +138,7 @@ class BleDevice extends BluetoothDevice{
     this.writeId = config.writeId;
     this.connectTimeout = config.connectTimeout || 10000;
     this.writeTimeout = config.writeTimeout || 200;
+    console.log(config);
   }
 
   async startup(){
@@ -170,7 +171,7 @@ class BleDevice extends BluetoothDevice{
     try{
       var resp = await this.config.onValueChange(
         this,
-        value.value
+        value
       );
       if(resp){
         this._dispatchSuccess(resp);
@@ -235,14 +236,14 @@ class BleDevice extends BluetoothDevice{
    */
   write(value) {
     this._clearTimeout();
-    if(!this.debug){
+    if(this.writeTimeout>0){
       this.timeoutHandle = setTimeout(() => {
         //这里报错
         if(this.resolve){
           this.timeoutHandle = null;
           this._dispatchError(new DeviceError(DeviceError.IO_ERROR));
         }
-      }, this.config.writeTimeout);
+      }, this.writeTimeout);
     }
     return new Promise((resolve, reject) => {
       this.resolve = resolve;
@@ -440,6 +441,7 @@ class BluetoothService{
             throw new Error("设备配置缺少onCreateDevice方法，请阅读文档");
           }
             var device = config.onCreateDevice(this,rawDevice,config);
+            device.debug = this.debug;
             device.setConfig(config);
             this.devices[rawDevice.deviceId] = device;
             this._onDeviceFound && this._onDeviceFound(device);

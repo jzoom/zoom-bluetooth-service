@@ -1,6 +1,6 @@
 {
   "name": "zoom-bluetooth-service",
-  "version": "1.0.19",
+  "version": "1.0.34",
   "description": "",
   "main": "lib/index.js",
   "typings": "index.d.ts",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
+    "@babel/plugin-syntax-flow": "^7.7.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/runtime": "^7.5.5",
     "babel-jest": "^24.8.0",

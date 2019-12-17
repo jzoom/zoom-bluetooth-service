@@ -239,6 +239,21 @@ declare class DeviceConfig{
 declare class BluetoothService{
 
   /**
+   * 设置适配器，在使用之前，需要先进行这一步
+   * 在rn中
+   * 
+   * import Adapter from 'react-native-wechat-ble';
+   * BluetoothService.setAdapter(Adapter);
+   * 
+   * 在taro中
+   * import Taro from '@tarojs/taro';
+   * BluetoothService.setAdapter(Taro);
+   * 
+   * @param adapter 
+   */
+  static setAdapter(adapter:any):void;
+
+  /**
    * 构造函数需要提供设备配置
    * @param configs 提供一组设备配置
    * @param debug 是否调试输出

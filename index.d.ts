@@ -317,6 +317,13 @@ declare class BluetoothService{
  * 设备异常，如设备命令错误、设备命令超时
  */
 declare class DeviceError extends Error{
+  static isDeviceError(e:any):boolean;
+  //
+  static DATA_ERROR:string;
+  static IO_ERROR:string;
+
+  //具体的错误类型，有两种：1、数据错误 2、蓝牙连接问题
+  code:string;
 
 }
 

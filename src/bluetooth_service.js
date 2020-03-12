@@ -3,7 +3,8 @@ import {split,str2hex, hex2str} from 'zoom-hex';
 import DeviceError from './device_error';
 
 var bluetoothAdapter;
-
+var _debug;
+var _fastMode;
 
 const MAX_DATE_LEN = 512;
 
@@ -138,27 +139,30 @@ class BleDevice extends BluetoothDevice{
     this.writeId = config.writeId;
     this.connectTimeout = config.connectTimeout || 10000;
     this.writeTimeout = config.writeTimeout || 200;
-    console.log(config);
+    if(_debug){
+      console.log(config);
+    }
+    
   }
 
   async startup(){
     //建立连接
     await this.createConnection();
-    //发现服务
-    var services = await this.getServices();
-    if(this.debug){
-      console.log(services);
-    }
-   
-    for(var i in services){
-      var service = services[i];
-      var characterisrics = await this.getCharacteristics(service.uuid);
-      if(this.debug){
-        console.log(characterisrics);
+    if(!_fastMode){
+      //发现服务
+      var services = await this.getServices();
+      if(_debug){
+        console.log(services);
       }
-     
+
+      for(var i in services){
+        var service = services[i];
+        var characterisrics = await this.getCharacteristics(service.uuid);
+        if(_debug){
+          console.log(characterisrics);
+        }
+      }
     }
-    
     await this.setNotify({
       serviceId:this.serviceId,
       characteristicId:this.notifyId,
@@ -274,12 +278,10 @@ class BleDevice extends BluetoothDevice{
           this,
           pack);
       }else{
-        if(this.debug){
+        if(_debug){
           console.warn('在promise调用过后再次调用??');
         }
-        
       }
-    
     }
   }
 
@@ -291,18 +293,18 @@ class BleDevice extends BluetoothDevice{
       this.reject = undefined;
       reject(e);
     } else {
-      if(this.debug){
+      if(_debug){
         console.warn('在promise调用过后再次调用??');
       }
     }
   }
 
-  _writeOnce(value) {
+  async _writeOnce(value) {
     if (!value) {
       throw new Error('请输入写入值');
     }
     //debug才输出
-    if(this.debug){
+    if(_debug){
       if (typeof value == 'string') {
         console.log('写入值', value);
         value = str2hex(value);
@@ -313,12 +315,17 @@ class BleDevice extends BluetoothDevice{
       value = str2hex(value);
     }
    
-    return bluetoothAdapter.writeBLECharacteristicValue({
-      deviceId: this.deviceId,
-      serviceId: this.serviceId,
-      characteristicId: this.writeId,
-      value: value,
-    });
+    try{
+      return await bluetoothAdapter.writeBLECharacteristicValue({
+        deviceId: this.deviceId,
+        serviceId: this.serviceId,
+        characteristicId: this.writeId,
+        value: value,
+      });
+    }catch(e){
+      console.log(e);
+      throw new DeviceError(e.code);
+    }
   }
   /**
    * 这里仅仅确认写入成功而已,所以不需要返回值
@@ -345,10 +352,11 @@ class ClassicBluetoothDevice extends BluetoothDevice{
 
 class BluetoothService{
 
-  constructor(configs,debug = false){
+  constructor(configs,fastMode=true,debug = false){
     this.configs = configs;
     this.devices = {};
-    this.debug = debug;
+    _debug = debug;
+    _fastMode=fastMode;
   }
 
   createBleDevice(rawDevice){
@@ -357,15 +365,15 @@ class BluetoothService{
 
   async startScan(){
     await bluetoothAdapter.openBluetoothAdapter();
-    if(this.debug){
+    if(_debug){
       console.log("openBluetoothAdapter ok");
     }
     await bluetoothAdapter.startBluetoothDevicesDiscovery();
-    if(this.debug){
+    if(_debug){
       console.log("startBluetoothDevicesDiscovery ok");
     }
     await bluetoothAdapter.onBluetoothDeviceFound(this.onRawDeviceFound.bind(this));
-    if(this.debug){
+    if(_debug){
       console.log("onBluetoothDeviceFound ok");
     }
     bluetoothAdapter.onBLECharacteristicValueChange(this.onBLECharacteristicValueChange.bind(this));
@@ -389,17 +397,22 @@ class BluetoothService{
   }
 
   async startupDevice(deviceId){
-     // 这里需要设置一下回调
-     var device =this.getDeviceById(deviceId);
-     if(device==null){
-      throw new Error("未找到"+deviceId+"对应的设备");
-     }
-     await device.startup();
-     if(!device.config.onStartup){
-       throw new Error("请在设备配置对象中设置onStartup回调方法");
-     }
-     return await device.config.onStartup(this,device);
- 
+    try{
+      // 这里需要设置一下回调
+      var device =this.getDeviceById(deviceId);
+      if(device==null){
+        throw new Error("未找到"+deviceId+"对应的设备");
+      }
+      await device.startup();
+      if(!device.config.onStartup){
+        throw new Error("请在设备配置对象中设置onStartup回调方法");
+      }
+      return await device.config.onStartup(this,device);
+
+    }catch(e){
+      console.log(e);
+      throw new DeviceError(DeviceError.IO_ERROR,"设备启动失败");
+    }
   }
 
   async close(){
@@ -431,7 +444,7 @@ class BluetoothService{
   onRawDeviceFound(devices){
     for(var i in devices.devices){
       var rawDevice = devices.devices[i];
-      if(this.debug){
+      if(_debug){
         console.log(rawDevice);
       }
       for(var j in this.configs){
@@ -441,7 +454,7 @@ class BluetoothService{
             throw new Error("设备配置缺少onCreateDevice方法，请阅读文档");
           }
             var device = config.onCreateDevice(this,rawDevice,config);
-            device.debug = this.debug;
+            device.debug = _debug;
             device.setConfig(config);
             this.devices[rawDevice.deviceId] = device;
             this._onDeviceFound && this._onDeviceFound(device);
